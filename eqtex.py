@@ -108,6 +108,18 @@ class _NodeVisitor(ast.NodeVisitor):
         return r'\frac{' + l_sym + r'}{' + r_sym + r'}', \
                r'\frac{' + l_val + r'}{' + r_val + r'}'
 
+    def process_Add(self, _, l, r):
+        l_sym, l_val = l
+        r_sym, r_val = r
+        return l_sym + r' + ' + r_sym,\
+               l_val + r' + ' + r_val
+
+    def process_MatMult(self, _, l, r):
+        l_sym, l_val = l
+        r_sym, r_val = r
+        return l_sym + r' \, ' + r_sym,\
+               l_val + r' \, ' + r_val
+
     def process_Assign(self, stmt):
         if len(stmt.targets) > 2:
             vals = stmt.value.elts
