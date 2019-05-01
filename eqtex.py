@@ -55,6 +55,18 @@ class _NodeVisitor(ast.NodeVisitor):
         return '{' + sym + '}^{T}', \
                '{' + val + '}^{T}'
 
+    def process_numpy_eye(self, args):
+        size = args[0].n
+        rows = []
+        row = [str(val) for val in [1] + (size -1) * [0]]
+        for _ in range(size):
+            rows.append('&'.join(row))
+            row = row[-1:] + row[:-1]
+
+        return 'I_{' + str(size) + '}', \
+               r'{\begin{bmatrix}' + r'\\'.join(rows) + r'\end{bmatrix}}_{'+ str(size) + '}'
+
+
     def process_numpy_array(self, args):
         sym_rows = []
         val_rows = []
