@@ -40,11 +40,13 @@ class _NodeVisitor(ast.NodeVisitor):
         return str(val.n), str(val.n)
 
     def process_numpy_invert(self, args):
-        sym = args[0].id
-        val = self.tokens.get(sym, sym)
-
-        return '{' + sym + '}^{-1}', \
-               '{' + val + '}^{-1}'
+        sym, val = self.process(args[0])
+        if isinstance(args[0], ast.BinOp):
+            return r'{\left(' + sym + r'\right)}^{-1}', \
+                   r'{\left(' + val + r'\right)}^{-1}'
+        else:
+            return '{' + sym + '}^{-1}', \
+                   '{' + val + '}^{-1}'
 
     def process_numpy_transpose(self, args):
         sym = args[0].id
