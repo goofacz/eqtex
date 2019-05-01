@@ -46,6 +46,12 @@ class _NodeVisitor(ast.NodeVisitor):
         return '{' + sym + '}^{-1}', \
                '{' + val + '}^{-1}'
 
+    def process_numpy_transpose(self, args):
+        sym = args[0].id
+        val = self.tokens.get(sym, sym)
+
+        return '{' + sym + '}^{T}', \
+               '{' + val + '}^{T}'
 
     def process_numpy_array(self, args):
         sym_rows = []
@@ -113,6 +119,12 @@ class _NodeVisitor(ast.NodeVisitor):
             sym, val = self.process(val)
             self.tokens[name] = val
             return f'{name}={sym}', f'{name}={val}'
+
+    def process_Attribute(self, attr):
+        if attr.attr == 'T':
+            return self.process_numpy_transpose([attr.value])
+        else:
+            raise RuntimeError(f'Unknow attribute: {attr.attr}')
 
     def visit_FunctionDef(self, node):
         if len(node.decorator_list) == 0:
