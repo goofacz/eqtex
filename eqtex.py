@@ -21,6 +21,15 @@ class _NodeVisitor(ast.NodeVisitor):
             ast.Sub: 0,
         }[op.__class__]
 
+    def create_matrix(self, args, val):
+        rows = args[0].elts[0].n
+        cols = args[0].elts[1].n
+
+        vals = r'\\'.join(rows * [r'&'.join(cols * [val])])
+
+        return r'\begin{bmatrix}' + vals + r'\end{bmatrix}', \
+               r'\begin{bmatrix}' + vals + r'\end{bmatrix}'
+
     def process(self, node, *args, func_suffix=None, ignore_missing=False):
         if func_suffix:
             name = f'process_{func_suffix}'
@@ -34,7 +43,7 @@ class _NodeVisitor(ast.NodeVisitor):
             raise RuntimeError(f'{name}() not found!')
 
     def process_Name(self, val):
-        return val.id, self.tokens.get(val.id,val.id)
+        return val.id, self.tokens.get(val.id, val.id)
 
     def process_Num(self, val):
         return str(val.n), str(val.n)
@@ -58,14 +67,19 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_numpy_eye(self, args):
         size = args[0].n
         rows = []
-        row = [str(val) for val in [1] + (size -1) * [0]]
+        row = [str(val) for val in [1] + (size - 1) * [0]]
         for _ in range(size):
             rows.append('&'.join(row))
             row = row[-1:] + row[:-1]
 
         return 'I_{' + str(size) + '}', \
-               r'{\begin{bmatrix}' + r'\\'.join(rows) + r'\end{bmatrix}}_{'+ str(size) + '}'
+               r'{\begin{bmatrix}' + r'\\'.join(rows) + r'\end{bmatrix}}_{' + str(size) + '}'
 
+    def process_numpy_ones(self, args):
+        return self.create_matrix(args, '1')
+
+    def process_numpy_zeros(self, args):
+        return self.create_matrix(args, '0')
 
     def process_numpy_array(self, args):
         sym_rows = []
@@ -107,13 +121,13 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_Mult(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' \cdot ' + r_sym,\
+        return l_sym + r' \cdot ' + r_sym, \
                l_val + r' \cdot ' + r_val
 
     def process_Sub(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' - ' + r_sym,\
+        return l_sym + r' - ' + r_sym, \
                l_val + r' - ' + r_val
 
     def process_Div(self, _, l, r):
@@ -125,13 +139,13 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_Add(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' + ' + r_sym,\
+        return l_sym + r' + ' + r_sym, \
                l_val + r' + ' + r_val
 
     def process_MatMult(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' \, ' + r_sym,\
+        return l_sym + r' \, ' + r_sym, \
                l_val + r' \, ' + r_val
 
     def process_Assign(self, stmt):
