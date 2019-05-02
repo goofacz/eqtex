@@ -121,6 +121,9 @@ class _NodeVisitor(ast.NodeVisitor):
                 r = (r'\left(' + r_sym + r'\right)', r'\left(' + r_val + r'\right)')
         return self.process(val.op, l, r)
 
+    def process_UnaryOp(self, stmt):
+        return self.process(stmt.op, stmt.operand)
+
     def process_Pass(self, _):
         pass
 
@@ -153,6 +156,16 @@ class _NodeVisitor(ast.NodeVisitor):
         r_sym, r_val = r
         return l_sym + r' \, ' + r_sym, \
                l_val + r' \, ' + r_val
+
+    def process_USub(self, _, stmt):
+        sym, val = self.process(stmt)
+
+        if isinstance(stmt, ast.BinOp):
+            sym = r'\left(' + sym + r'\right)'
+            val = r'\left(' + val + r'\right)'
+
+        return r' - ' + sym, \
+               r' - ' + val
 
     def process_Assign(self, stmt):
         if len(stmt.targets) > 2:
