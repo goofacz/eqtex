@@ -167,6 +167,13 @@ class _NodeVisitor(ast.NodeVisitor):
         return r' - ' + sym, \
                r' - ' + val
 
+    def process_Pow(self, _, l, r):
+        l_sym, l_val = l
+        r_sym, r_val = r
+
+        p = r'{{{0}}}^{{{1}}}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
+
     def process_Assign(self, stmt):
         if len(stmt.targets) > 2:
             vals = stmt.value.elts
