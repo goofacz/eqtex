@@ -24,11 +24,9 @@ class _NodeVisitor(ast.NodeVisitor):
     def create_matrix(self, args, val):
         rows = args[0].elts[0].n
         cols = args[0].elts[1].n
-
+        p = r'\begin{{bmatrix}}{0}\end{{bmatrix}}'
         vals = r'\\'.join(rows * [r'&'.join(cols * [val])])
-
-        return r'\begin{bmatrix}' + vals + r'\end{bmatrix}', \
-               r'\begin{bmatrix}' + vals + r'\end{bmatrix}'
+        return p.format(vals),p.format(vals)
 
     def process(self, node, *args, func_suffix=None, ignore_missing=False):
         if func_suffix:
@@ -51,18 +49,17 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_numpy_invert(self, args):
         sym, val = self.process(args[0])
         if isinstance(args[0], ast.BinOp):
-            return r'{\left(' + sym + r'\right)}^{-1}', \
-                   r'{\left(' + val + r'\right)}^{-1}'
+            p = r'{{\left({0}\right)}}^{{-1}}'
         else:
-            return '{' + sym + '}^{-1}', \
-                   '{' + val + '}^{-1}'
+            p = r'{{{0}}}^{{-1}}'
+
+        return p.format(sym), p.format(val)
 
     def process_numpy_transpose(self, args):
         sym = args[0].id
         val = self.tokens.get(sym, sym)
-
-        return '{' + sym + '}^{T}', \
-               '{' + val + '}^{T}'
+        p = '{{{0}}}^{{T}}'
+        return p.format(sym), p.format(val)
 
     def process_numpy_eye(self, args):
         size = args[0].n
@@ -72,14 +69,14 @@ class _NodeVisitor(ast.NodeVisitor):
             rows.append('&'.join(row))
             row = row[-1:] + row[:-1]
 
-        return 'I_{' + str(size) + '}', \
-               r'{\begin{bmatrix}' + r'\\'.join(rows) + r'\end{bmatrix}}_{' + str(size) + '}'
+        return r'I_{{{0}}}'.format(str(size)), \
+               r'\begin{{bmatrix}}{0}\end{{bmatrix}}_{{{1}}}'.format(r'\\'.join(rows), str(size))
 
     def process_numpy_divide(self, args):
         l_sym, l_val = self.process(args[0])
         r_sym, r_val = self.process(args[1])
-        return r'\frac{' + l_sym + r'}{' + r_sym + r'}', \
-               r'\frac{' + l_val + r'}{' + r_val + r'}'
+        p = r'\frac{{{0}}}{{{1}}}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_numpy_ones(self, args):
         return self.create_matrix(args, '1')
@@ -101,8 +98,8 @@ class _NodeVisitor(ast.NodeVisitor):
             sym_rows.append('&'.join(syms))
             val_rows.append('&'.join(vals))
 
-        return r'\begin{bmatrix}' + r'\\'.join(sym_rows) + r'\end{bmatrix}', \
-               r'\begin{bmatrix}' + r'\\'.join(val_rows) + r'\end{bmatrix}'
+        p = r'\begin{{bmatrix}}{0}\end{{bmatrix}}'
+        return p.format(r'\\'.join(sym_rows)), p.format(r'\\'.join(val_rows))
 
     def process_Call(self, val):
         return self.process(val.args, func_suffix=f'numpy_{val.func.id}', ignore_missing=False)
@@ -110,15 +107,17 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_BinOp(self, val):
         l = self.process(val.left)
         r = self.process(val.right)
+        p = r'\left({0}\right)'
 
         if isinstance(val.left, ast.BinOp):
             l_sym, l_val = l
             if (self.get_precedense(val.left.op) < self.get_precedense(val.op)) and not isinstance(val.op, ast.Div):
-                l = (r'\left(' + l_sym + r'\right)', r'\left(' + l_val + r'\right)')
+                l = [p.format(l_sym), p.format(l_val)]
         if isinstance(val.right, ast.BinOp):
             r_sym, r_val = r
             if (self.get_precedense(val.right.op) < self.get_precedense(val.op)) and not isinstance(val.op, ast.Div):
-                r = (r'\left(' + r_sym + r'\right)', r'\left(' + r_val + r'\right)')
+                l = [p.format(r_sym), p.format(r_val)]
+
         return self.process(val.op, l, r)
 
     def process_UnaryOp(self, stmt):
@@ -130,42 +129,42 @@ class _NodeVisitor(ast.NodeVisitor):
     def process_Mult(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' \cdot ' + r_sym, \
-               l_val + r' \cdot ' + r_val
+        p = r'{0} \cdot {1}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_Sub(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' - ' + r_sym, \
-               l_val + r' - ' + r_val
+        p = r'{0} - {1}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_Div(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return r'\frac{' + l_sym + r'}{' + r_sym + r'}', \
-               r'\frac{' + l_val + r'}{' + r_val + r'}'
+        p = r'\frac{{{0}}}{{{1}}}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_Add(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' + ' + r_sym, \
-               l_val + r' + ' + r_val
+        p = r'{0} + {1}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_MatMult(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
-        return l_sym + r' \, ' + r_sym, \
-               l_val + r' \, ' + r_val
+        p = r'{0} \, {1}'
+        return p.format(l_sym, r_sym), p.format(l_val, r_val)
 
     def process_USub(self, _, stmt):
         sym, val = self.process(stmt)
 
         if isinstance(stmt, ast.BinOp):
-            sym = r'\left(' + sym + r'\right)'
-            val = r'\left(' + val + r'\right)'
+            p = r'\left({0}\right)'
+            sym, val = p.format(sym), p.format(val)
 
-        return r' - ' + sym, \
-               r' - ' + val
+        p = r' - {0}'
+        return p.format(sym), p.format(val)
 
     def process_Pow(self, _, l, r):
         l_sym, l_val = l
