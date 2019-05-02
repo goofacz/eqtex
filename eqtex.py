@@ -75,6 +75,12 @@ class _NodeVisitor(ast.NodeVisitor):
         return 'I_{' + str(size) + '}', \
                r'{\begin{bmatrix}' + r'\\'.join(rows) + r'\end{bmatrix}}_{' + str(size) + '}'
 
+    def process_numpy_divide(self, args):
+        l_sym, l_val = self.process(args[0])
+        r_sym, r_val = self.process(args[1])
+        return r'\frac{' + l_sym + r'}{' + r_sym + r'}', \
+               r'\frac{' + l_val + r'}{' + r_val + r'}'
+
     def process_numpy_ones(self, args):
         return self.create_matrix(args, '1')
 
