@@ -1,112 +1,23 @@
-import abc
-import argparse
+# This file is part of EqTex.
+#
+# Copyright 2019 Tomasz Jankowski
+#
+# EqTex is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# EqTex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser Public License for more details.
+#
+# You should have received a copy of the GNU Lesser Public License
+# along with EqTex. If not, see <http://www.gnu.org/licenses/>.
+
 import ast
-import copy
-import enum
-import inspect
-import os
 
-
-class Output:
-    class EqType(enum.Enum):
-        SYM = 'sym'
-        NUM = 'num'
-
-    @abc.abstractmethod
-    def process(self, func_name, cls_prefix, eq_type, tex, config):
-        pass
-
-
-class _FileOutput(Output):
-    def process(self, func_name, cls_prefix, eq_type, tex, config):
-        base_name = f'{"_".join(cls_prefix)}_{func_name}_{eq_type.value}'
-        if config.file_output_single_eq:
-            tex = r'\\'.join(tex)
-            name = f'{base_name}.tex'
-            with open(name, 'w') as f:
-                f.write(tex)
-        else:
-            for i in range(len(tex)):
-                name = f'{base_name}_{i}.tex'
-                with open(name, 'w') as f:
-                    f.write(tex[i])
-
-
-class Config:
-    def __init__(self):
-        # Global
-        self.enabled = True
-        self.store_tex = True
-        self.sym_equation = True
-        self.val_equation = True
-
-        # File output
-        self.file_output_single_eq = True
-
-
-class _Source:
-    def __init__(self, file_path=None):
-        self.file_path = file_path
-        self.file_name = os.path.splitext(os.path.basename(self.file_path))[0]
-
-        with open(self.file_path) as handle:
-            self.tree = ast.parse(handle.read())
-
-
-class _Visitor(ast.NodeVisitor):
-    def process(self, node, *args, func_suffix=None, ignore_missing=False):
-        if func_suffix:
-            name = f'process_{func_suffix}'
-        else:
-            name = f'process_{node.__class__.__name__}'
-
-        method = getattr(self, name, None)
-        if method:
-            return method(node, *args)
-        elif not ignore_missing:
-            raise RuntimeError(f'{name}() not found!')
-
-
-class _SourceVisitor(_Visitor):
-    def __init__(self, target_func_qualname, output, config):
-        self.prefix = []
-        self.target_func_qualname = target_func_qualname
-        self.output = output
-        self.config = config
-
-    def store_tex(self, visitor):
-        if not self.config.store_tex:
-            return
-
-        if self.config.sym_equation:
-            self.output.process(visitor.func_name, self.prefix, Output.EqType.SYM, visitor.sym_tex, self.config)
-
-        if self.config.val_equation:
-            self.output.process(visitor.func_name, self.prefix, Output.EqType.NUM, visitor.val_tex, self.config)
-
-    def visit_FunctionDef(self, func):
-        tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
-        if tag:
-            if self.target_func_qualname:
-                func_qualname = f'{".".join(self.prefix)}.{func.name}'
-                if func_qualname != self.target_func_qualname:
-                    return
-
-            v = _FuncVisitor()
-            v.visit(func)
-
-            self.store_tex(v)
-        else:
-            self.prefix.append(func.name)
-            for node in func.body:
-                self.visit(node)
-            self.prefix.pop()
-
-    def visit_ClassDef(self, cls):
-        self.prefix.append(cls.name)
-        for node in cls.body:
-            self.visit(node)
-        self.prefix.pop()
+from .visitor import _Visitor
 
 
 class _FuncVisitor(_Visitor):
@@ -298,76 +209,3 @@ class _FuncVisitor(_Visitor):
                 self.sym_tex.append(sym)
             if val:
                 self.val_tex.append(val)
-
-
-def _process_func(func, **kwargs):
-    global _source
-    global eqtex_config
-
-    func_qualname = func.__qualname__.replace('<locals>.', '')
-    output = _FileOutput()
-    config = copy.deepcopy(eqtex_config)
-
-    for key, val in kwargs.items():
-        if key == 'output':
-            output = val
-        else:
-            setattr(config, key, val)
-
-    v = _SourceVisitor(func_qualname, output, config)
-    v.visit(_source.tree)
-
-
-def eqtex(**kwargs):
-    file_path = inspect.stack()[1][1]
-
-    def decorator(func):
-        if eqtex_config.enabled:
-            global _source
-            if not _source:
-                _source = _Source(file_path)
-            _process_func(func, **kwargs)
-        return func
-
-    return decorator
-
-
-def _handle_cmg_args():
-    p = argparse.ArgumentParser()
-    p.add_argument('sources', help='Python file or src directory', type=str)
-    return p.parse_args()
-
-
-def _find_file_paths(cmd_args):
-    if os.path.isfile(cmd_args.sources):
-        return [cmd_args.sources]
-    else:
-        raise RuntimeError('TODO')
-
-
-def _process_file(file_path):
-    with open(file_path, 'r') as file:
-        global eqtex_config
-        tree = ast.parse(file.read())
-        output = _FileOutput()
-        _SourceVisitor(None, output, eqtex_config).visit(tree)
-
-
-def _process_files(file_paths):
-    for file_path in file_paths:
-        _process_file(file_path)
-
-
-def _main():
-    cmd_args = _handle_cmg_args()
-    file_paths = _find_file_paths(cmd_args)
-    _process_files(file_paths)
-
-
-eqtex_config = Config()
-_source = None
-
-if __name__ == '__main__':
-    _main()
-else:
-    pass

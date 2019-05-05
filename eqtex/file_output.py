@@ -15,10 +15,19 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .config import eqtex_config
-from .main import _main
 from .output import Output
-from .tag import eqtex
 
-if __name__ == '__main__':
-    _main()
+
+class _FileOutput(Output):
+    def process(self, func_name, cls_prefix, eq_type, tex, config):
+        base_name = f'{"_".join(cls_prefix)}_{func_name}_{eq_type.value}'
+        if config.file_output_single_eq:
+            tex = r'\\'.join(tex)
+            name = f'{base_name}.tex'
+            with open(name, 'w') as f:
+                f.write(tex)
+        else:
+            for i in range(len(tex)):
+                name = f'{base_name}_{i}.tex'
+                with open(name, 'w') as f:
+                    f.write(tex[i])

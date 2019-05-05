@@ -15,10 +15,16 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .config import eqtex_config
-from .main import _main
-from .output import Output
-from .tag import eqtex
+class Config:
+    def __init__(self):
+        # Global
+        self.enabled = True
+        self.store_tex = True
+        self.sym_equation = True
+        self.val_equation = True
 
-if __name__ == '__main__':
-    _main()
+        # File output
+        self.file_output_single_eq = True
+
+
+eqtex_config = Config()

@@ -15,10 +15,15 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .config import eqtex_config
-from .main import _main
-from .output import Output
-from .tag import eqtex
+import abc
+import enum
 
-if __name__ == '__main__':
-    _main()
+
+class Output:
+    class EqType(enum.Enum):
+        SYM = 'sym'
+        NUM = 'num'
+
+    @abc.abstractmethod
+    def process(self, func_name, cls_prefix, eq_type, tex, config):
+        pass

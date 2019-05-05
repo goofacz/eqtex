@@ -15,10 +15,14 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .config import eqtex_config
-from .main import _main
-from .output import Output
-from .tag import eqtex
+import ast
+import os
 
-if __name__ == '__main__':
-    _main()
+
+class _Source:
+    def __init__(self, file_path=None):
+        self.file_path = file_path
+        self.file_name = os.path.splitext(os.path.basename(self.file_path))[0]
+
+        with open(self.file_path) as handle:
+            self.tree = ast.parse(handle.read())

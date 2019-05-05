@@ -15,10 +15,18 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .config import eqtex_config
-from .main import _main
-from .output import Output
-from .tag import eqtex
+import ast
 
-if __name__ == '__main__':
-    _main()
+
+class _Visitor(ast.NodeVisitor):
+    def process(self, node, *args, func_suffix=None, ignore_missing=False):
+        if func_suffix:
+            name = f'process_{func_suffix}'
+        else:
+            name = f'process_{node.__class__.__name__}'
+
+        method = getattr(self, name, None)
+        if method:
+            return method(node, *args)
+        elif not ignore_missing:
+            raise RuntimeError(f'{name}() not found!')
