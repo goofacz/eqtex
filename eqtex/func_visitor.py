@@ -106,7 +106,10 @@ class FuncVisitor(Visitor):
         return p.format(r'\\'.join(sym_rows)), p.format(r'\\'.join(val_rows))
 
     def process_Call(self, val):
-        return self.process(val.args, func_suffix=f'numpy_{val.func.id}', ignore_missing=False)
+        if isinstance(val.func, ast.Name):
+            return self.process(val.args, func_suffix=f'numpy_{val.func.id}')
+        elif isinstance(val.func, ast.Attribute):
+            return self.process(val.args, func_suffix=f'numpy_{val.func.attr}')
 
     def process_BinOp(self, val):
         l = self.process(val.left)
