@@ -3,6 +3,7 @@ import argparse
 import ast
 import copy
 import enum
+import inspect
 import os
 
 
@@ -44,9 +45,10 @@ class Config:
 
 
 class _Source:
-    def __init__(self):
-        self.file_path = os.sys.argv[0]
+    def __init__(self, file_path=None):
+        self.file_path = file_path
         self.file_name = os.path.splitext(os.path.basename(self.file_path))[0]
+
         with open(self.file_path) as handle:
             self.tree = ast.parse(handle.read())
 
@@ -84,17 +86,20 @@ class _SourceVisitor(_Visitor):
 
     def visit_FunctionDef(self, func):
         tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
-        if not tag:
-            return
+        if tag:
+            func_qualname = f'{".".join(self.prefix)}.{func.name}'
+            if func_qualname != self.target_func_qualname:
+                return
 
-        func_qualname = f'{".".join(self.prefix)}.{func.name}'
-        if func_qualname != self.target_func_qualname:
-            return
+            v = _FuncVisitor()
+            v.visit(func)
 
-        v = _FuncVisitor()
-        v.visit(func)
-
-        self.store_tex(v)
+            self.store_tex(v)
+        else:
+            self.prefix.append(func.name)
+            for node in func.body:
+                self.visit(node)
+            self.prefix.pop()
 
     def visit_ClassDef(self, cls):
         self.prefix.append(cls.name)
@@ -296,7 +301,7 @@ def _process_func(func, **kwargs):
     global _source
     global eqtex_config
 
-    func_qualname = func.__qualname__
+    func_qualname = func.__qualname__.replace('<locals>.', '')
     output = _FileOutput()
     config = copy.deepcopy(eqtex_config)
 
@@ -311,11 +316,13 @@ def _process_func(func, **kwargs):
 
 
 def eqtex(**kwargs):
+    file_path = inspect.stack()[1][1]
+
     def decorator(func):
         if eqtex_config.enabled:
             global _source
             if not _source:
-                _source = _Source()
+                _source = _Source(file_path)
             _process_func(func, **kwargs)
         return func
 
