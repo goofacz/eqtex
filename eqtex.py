@@ -1,6 +1,31 @@
+import abc
 import argparse
 import ast
+import copy
+import enum
 import os
+
+
+class Output:
+    class EqType(enum.Enum):
+        SYM = 1,
+        NUM = 2
+
+    @abc.abstractmethod
+    def process(self, func_name, cls_prefix, eq_type, tex):
+        pass
+
+
+class _FileOutput(Output):
+    def process(self, func_name, cls_prefix, eq_type, tex):
+        if eq_type == Output.EqType.SYM:
+            type = 'sym'
+        elif eq_type == Output.EqType.NUM:
+            type = 'num'
+
+        fn = f'{"_".join(cls_prefix)}_{func_name}_{type}.tex'
+        with open(fn, 'w') as f:
+            f.write(tex)
 
 
 class Config:
@@ -34,27 +59,29 @@ class _Visitor(ast.NodeVisitor):
 
 
 class _SourceVisitor(_Visitor):
-    def __init__(self):
+    def __init__(self, target_func_qualname, output, config):
         self.prefix = []
+        self.target_func_qualname = target_func_qualname
+        self.output = output
+        self.config = config
 
     def store_tex(self, visitor):
-        global eqtex_config
-        if not eqtex_config.store_tex:
+        if not self.config.store_tex:
             return
 
-        if eqtex_config.sym_equation:
-            fn = f'{"_".join(self.prefix)}_{visitor.func_name}_sym.tex'
-            with open(fn, 'w') as f:
-                f.write(visitor.sym_tex)
+        if self.config.sym_equation:
+            self.output.process(visitor.func_name, self.prefix, Output.EqType.SYM, visitor.sym_tex)
 
-        if eqtex_config.val_equation:
-            fn = f'{"_".join(self.prefix)}_{visitor.func_name}_val.tex'
-            with open(fn, 'w') as f:
-                f.write(visitor.val_tex)
+        if self.config.val_equation:
+            self.output.process(visitor.func_name, self.prefix, Output.EqType.NUM, visitor.val_tex)
 
     def visit_FunctionDef(self, func):
         tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
         if not tag:
+            return
+
+        func_qualname = f'{".".join(self.prefix)}.{func.name}'
+        if func_qualname != self.target_func_qualname:
             return
 
         v = _FuncVisitor()
@@ -91,7 +118,7 @@ class _FuncVisitor(_Visitor):
         cols = args[0].elts[1].n
         p = r'\begin{{bmatrix}}{0}\end{{bmatrix}}'
         vals = r'\\'.join(rows * [r'&'.join(cols * [val])])
-        return p.format(vals),p.format(vals)
+        return p.format(vals), p.format(vals)
 
     def process_Name(self, val):
         return val.id, self.tokens.get(val.id, val.id)
@@ -248,7 +275,7 @@ class _FuncVisitor(_Visitor):
 
     def visit_FunctionDef(self, func):
         if self.func_name:
-            return # TODO Skip internal functions
+            return  # TODO Skip internal functions
 
         self.func_name = func.name
 
@@ -264,8 +291,19 @@ class _FuncVisitor(_Visitor):
 
 def _process_func(func, **kwargs):
     global _source
-    func_name = func.__name__
-    v = _SourceVisitor()
+    global eqtex_config
+
+    func_qualname = func.__qualname__
+    output = _FileOutput()
+    config = copy.deepcopy(eqtex_config)
+
+    for key, val in kwargs.items():
+        if key == 'output':
+            output = val
+        else:
+            setattr(config, key, val)
+
+    v = _SourceVisitor(func_qualname, output, config)
     v.visit(_source.tree)
 
 
@@ -277,6 +315,7 @@ def eqtex(**kwargs):
                 _source = _Source()
             _process_func(func, **kwargs)
         return func
+
     return decorator
 
 
