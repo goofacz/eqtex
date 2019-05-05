@@ -87,9 +87,10 @@ class _SourceVisitor(_Visitor):
     def visit_FunctionDef(self, func):
         tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
         if tag:
-            func_qualname = f'{".".join(self.prefix)}.{func.name}'
-            if func_qualname != self.target_func_qualname:
-                return
+            if self.target_func_qualname:
+                func_qualname = f'{".".join(self.prefix)}.{func.name}'
+                if func_qualname != self.target_func_qualname:
+                    return
 
             v = _FuncVisitor()
             v.visit(func)
@@ -344,8 +345,10 @@ def _find_file_paths(cmd_args):
 
 def _process_file(file_path):
     with open(file_path, 'r') as file:
+        global eqtex_config
         tree = ast.parse(file.read())
-        _FuncVisitor().visit(tree)
+        output = _FileOutput()
+        _SourceVisitor(None, output, eqtex_config).visit(tree)
 
 
 def _process_files(file_paths):
