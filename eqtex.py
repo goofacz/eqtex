@@ -12,23 +12,35 @@ class Output:
         NUM = 'num'
 
     @abc.abstractmethod
-    def process(self, func_name, cls_prefix, eq_type, tex):
+    def process(self, func_name, cls_prefix, eq_type, tex, config):
         pass
 
 
 class _FileOutput(Output):
-    def process(self, func_name, cls_prefix, eq_type, tex):
-        fn = f'{"_".join(cls_prefix)}_{func_name}_{eq_type.value}.tex'
-        with open(fn, 'w') as f:
-            f.write(tex)
+    def process(self, func_name, cls_prefix, eq_type, tex, config):
+        base_name = f'{"_".join(cls_prefix)}_{func_name}_{eq_type.value}'
+        if config.file_output_single_eq:
+            tex = r'\\'.join(tex)
+            name = f'{base_name}.tex'
+            with open(name, 'w') as f:
+                f.write(tex)
+        else:
+            for i in range(len(tex)):
+                name = f'{base_name}_{i}.tex'
+                with open(name, 'w') as f:
+                    f.write(tex[i])
 
 
 class Config:
     def __init__(self):
+        # Global
         self.enabled = True
         self.store_tex = True
         self.sym_equation = True
         self.val_equation = True
+
+        # File output
+        self.file_output_single_eq = True
 
 
 class _Source:
@@ -65,10 +77,10 @@ class _SourceVisitor(_Visitor):
             return
 
         if self.config.sym_equation:
-            self.output.process(visitor.func_name, self.prefix, Output.EqType.SYM, visitor.sym_tex)
+            self.output.process(visitor.func_name, self.prefix, Output.EqType.SYM, visitor.sym_tex, self.config)
 
         if self.config.val_equation:
-            self.output.process(visitor.func_name, self.prefix, Output.EqType.NUM, visitor.val_tex)
+            self.output.process(visitor.func_name, self.prefix, Output.EqType.NUM, visitor.val_tex, self.config)
 
     def visit_FunctionDef(self, func):
         tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
@@ -95,8 +107,8 @@ class _FuncVisitor(_Visitor):
     def __init__(self):
         self.tokens = {}
         self.func_name = None
-        self.sym_tex = ''
-        self.val_tex = ''
+        self.sym_tex = []
+        self.val_tex = []
 
     def get_precedense(self, op):
         return {
@@ -276,12 +288,8 @@ class _FuncVisitor(_Visitor):
 
         for stmt in func.body:
             sym, val = self.process(stmt)
-            self.sym_tex = f'{self.sym_tex}\n{sym}\n'
-            self.val_tex = f'{self.val_tex}\n{val}\n'
-
-        p = r'\begin{{equation}}{0}\end{{equation}}'
-        self.sym_tex = p.format(self.sym_tex)
-        self.val_tex = p.format(self.val_tex)
+            self.sym_tex.append(sym)
+            self.val_tex.append(val)
 
 
 def _process_func(func, **kwargs):
