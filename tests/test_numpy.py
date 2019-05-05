@@ -36,7 +36,7 @@ class TestCase(ut.TestCase):
 
 
 class TestNumpy(TestCase):
-    def test_ones1(self):
+    def test_ones(self):
         @eqtex(output=self.buffer)
         def func():
             A = ones([2, 4])
