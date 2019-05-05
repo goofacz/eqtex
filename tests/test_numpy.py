@@ -62,6 +62,48 @@ class TestNumpy(TestCase):
         self.assertEqual(self.buffer.num,
                          [r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}'])
 
+    def test_transpose(self):
+        @eqtex(output=self.buffer)
+        def func(a, b):
+            A = array([[a], [2], [b]])
+            B = transpose(A)
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          'B={A}^{T}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}'])
+
+    def test_invert(self):
+        @eqtex(output=self.buffer)
+        def func(a, b):
+            A = array([[a], [2], [b]])
+            B = invert(A)
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          'B={A}^{-1}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{-1}'])
+
+    def test_divide(self):
+        @eqtex(output=self.buffer)
+        def func(a, b, c, d, e, f):
+            A = array([[a], [2], [b]])
+            B = array([[c, d], [3, 4], [e, f]])
+            C = divide(A, B)
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
+                          r'C=\frac{A}{B}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
+                          r'C=\frac{\begin{bmatrix}a\\2\\b\end{bmatrix}}{\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}}'])
+
 
 if __name__ == '__main__':
     ut.main()
