@@ -217,7 +217,7 @@ class _FuncVisitor(_Visitor):
         return self.process(stmt.op, stmt.operand)
 
     def process_Pass(self, _):
-        pass
+        return None, None
 
     def process_Mult(self, _, l, r):
         l_sym, l_val = l
@@ -294,8 +294,10 @@ class _FuncVisitor(_Visitor):
 
         for stmt in func.body:
             sym, val = self.process(stmt)
-            self.sym_tex.append(sym)
-            self.val_tex.append(val)
+            if sym:
+                self.sym_tex.append(sym)
+            if val:
+                self.val_tex.append(val)
 
 
 def _process_func(func, **kwargs):
