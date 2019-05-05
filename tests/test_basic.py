@@ -34,10 +34,18 @@ class TestCase(ut.TestCase):
 
 
 class EmptyFunc(TestCase):
-    def test_empty(self):
+    def test_pass(self):
         @eqtex(output=self.buffer)
         def func():
             pass
+
+        self.assertEqual(self.buffer.sym, [])
+        self.assertEqual(self.buffer.num, [])
+
+    def test_return(self):
+        @eqtex(output=self.buffer)
+        def func():
+            return None
 
         self.assertEqual(self.buffer.sym, [])
         self.assertEqual(self.buffer.num, [])
