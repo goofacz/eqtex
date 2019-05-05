@@ -16,10 +16,11 @@
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
 import unittest as ut
+
 import numpy
+from numpy import *
 
 from eqtex import *
-from numpy import *
 
 
 class Buffer(Output):
@@ -48,6 +49,19 @@ class TestNumpy(TestCase):
         self.assertEqual(self.buffer.num,
                          [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
                           r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}'])
+
+    def test_eye(self):
+        @eqtex(output=self.buffer)
+        def func():
+            A = eye(5)
+            B = numpy.eye(5)
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=I_{5}',
+                          r'B=I_{5}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}',
+                          r'B=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}'])
 
 
 if __name__ == '__main__':
