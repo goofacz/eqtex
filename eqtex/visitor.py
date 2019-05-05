@@ -19,7 +19,7 @@ import ast
 
 
 class _Visitor(ast.NodeVisitor):
-    def process(self, node, *args, func_suffix=None, ignore_missing=False):
+    def process(self, node, *args, func_suffix=None, ignore_missing=True):
         if func_suffix:
             name = f'process_{func_suffix}'
         else:
@@ -28,5 +28,7 @@ class _Visitor(ast.NodeVisitor):
         method = getattr(self, name, None)
         if method:
             return method(node, *args)
-        elif not ignore_missing:
+        elif ignore_missing:
+            return None, None
+        else:
             raise RuntimeError(f'{name}() not found!')
