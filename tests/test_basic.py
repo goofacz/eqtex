@@ -1,6 +1,6 @@
 import unittest as ut
 
-from eqtex import *
+from eqtex.eqtex import *
 
 
 class Buffer(Output):
