@@ -127,9 +127,6 @@ class _FuncVisitor(_Visitor):
     def process_UnaryOp(self, stmt):
         return self.process(stmt.op, stmt.operand)
 
-    def process_Pass(self, _):
-        return None, None
-
     def process_Mult(self, _, l, r):
         l_sym, l_val = l
         r_sym, r_val = r
