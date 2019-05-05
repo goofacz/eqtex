@@ -148,3 +148,7 @@ class OperatorPrecedence(TestCase):
                          [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6'])
         self.assertEqual(self.buffer.num,
                          [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6'])
+
+
+if __name__ == '__main__':
+    ut.main()
