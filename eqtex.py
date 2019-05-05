@@ -2,14 +2,79 @@ import argparse
 import ast
 import os
 
-from pylatex import Document
-from pylatex.package import Package
-from pylatex.utils import NoEscape
+
+class Config:
+    def __init__(self):
+        self.enabled = True
+        self.store_tex = True
+        self.sym_equation = True
+        self.val_equation = True
 
 
-class _NodeVisitor(ast.NodeVisitor):
+class _Source:
+    def __init__(self):
+        self.file_path = os.sys.argv[0]
+        self.file_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        with open(self.file_path) as handle:
+            self.tree = ast.parse(handle.read())
+
+
+class _Visitor(ast.NodeVisitor):
+    def process(self, node, *args, func_suffix=None, ignore_missing=False):
+        if func_suffix:
+            name = f'process_{func_suffix}'
+        else:
+            name = f'process_{node.__class__.__name__}'
+
+        method = getattr(self, name, None)
+        if method:
+            return method(node, *args)
+        elif not ignore_missing:
+            raise RuntimeError(f'{name}() not found!')
+
+
+class _SourceVisitor(_Visitor):
+    def __init__(self):
+        self.prefix = []
+
+    def store_tex(self, visitor):
+        global eqtex_config
+        if not eqtex_config.store_tex:
+            return
+
+        if eqtex_config.sym_equation:
+            fn = f'{"_".join(self.prefix)}_{visitor.func_name}_sym.tex'
+            with open(fn, 'w') as f:
+                f.write(visitor.sym_tex)
+
+        if eqtex_config.val_equation:
+            fn = f'{"_".join(self.prefix)}_{visitor.func_name}_val.tex'
+            with open(fn, 'w') as f:
+                f.write(visitor.val_tex)
+
+    def visit_FunctionDef(self, func):
+        tag = next((t for t in func.decorator_list if t.func.id == 'eqtex'), None)
+        if not tag:
+            return
+
+        v = _FuncVisitor()
+        v.visit(func)
+
+        self.store_tex(v)
+
+    def visit_ClassDef(self, cls):
+        self.prefix.append(cls.name)
+        for node in cls.body:
+            self.visit(node)
+        self.prefix.pop()
+
+
+class _FuncVisitor(_Visitor):
     def __init__(self):
         self.tokens = {}
+        self.func_name = None
+        self.sym_tex = ''
+        self.val_tex = ''
 
     def get_precedense(self, op):
         return {
@@ -27,18 +92,6 @@ class _NodeVisitor(ast.NodeVisitor):
         p = r'\begin{{bmatrix}}{0}\end{{bmatrix}}'
         vals = r'\\'.join(rows * [r'&'.join(cols * [val])])
         return p.format(vals),p.format(vals)
-
-    def process(self, node, *args, func_suffix=None, ignore_missing=False):
-        if func_suffix:
-            name = f'process_{func_suffix}'
-        else:
-            name = f'process_{node.__class__.__name__}'
-
-        method = getattr(self, name, None)
-        if method:
-            return method(node, *args)
-        elif not ignore_missing:
-            raise RuntimeError(f'{name}() not found!')
 
     def process_Name(self, val):
         return val.id, self.tokens.get(val.id, val.id)
@@ -180,38 +233,51 @@ class _NodeVisitor(ast.NodeVisitor):
             vals = [stmt.value]
 
         for target, val in zip(stmt.targets, vals):
-            name = target.id
+            name, _ = self.process(target)
             sym, val = self.process(val)
             self.tokens[name] = val
             return f'{name}={sym}', f'{name}={val}'
 
     def process_Attribute(self, attr):
-        if attr.attr == 'T':
+        if attr.value.id == 'self':
+            return attr.attr, self.tokens.get(attr.attr, attr.attr)
+        elif attr.attr == 'T':
             return self.process_numpy_transpose([attr.value])
         else:
             raise RuntimeError(f'Unknow attribute: {attr.attr}')
 
-    def visit_FunctionDef(self, node):
-        if len(node.decorator_list) == 0:
-            return
+    def visit_FunctionDef(self, func):
+        if self.func_name:
+            return # TODO Skip internal functions
 
-        doc = Document()
-        doc.packages.append(Package('amsmath'))
+        self.func_name = func.name
 
-        for stmt in node.body:
+        for stmt in func.body:
             sym, val = self.process(stmt)
-            doc.append(NoEscape(r'\begin{equation}'))
-            doc.append(NoEscape(sym))
-            doc.append(NoEscape(r'\end{equation}'))
-            doc.append(NoEscape(r'\begin{equation}'))
-            doc.append(NoEscape(val))
-            doc.append(NoEscape(r'\end{equation}'))
+            self.sym_tex = f'{self.sym_tex}\n{sym}'
+            self.val_tex = f'{self.val_tex}\n{val}'
 
-        doc.generate_pdf('numpy_ex', clean_tex=False)
+        p = r'\begin{{equation}}{0}\end{{equation}}'
+        self.sym_tex = p.format(self.sym_tex)
+        self.val_tex = p.format(self.val_tex)
 
 
-def eqtex():
-    pass
+def _process_func(func, **kwargs):
+    global _source
+    func_name = func.__name__
+    v = _SourceVisitor()
+    v.visit(_source.tree)
+
+
+def eqtex(**kwargs):
+    def decorator(func):
+        if eqtex_config.enabled:
+            global _source
+            if not _source:
+                _source = _Source()
+            _process_func(func, **kwargs)
+        return func
+    return decorator
 
 
 def _handle_cmg_args():
@@ -230,7 +296,7 @@ def _find_file_paths(cmd_args):
 def _process_file(file_path):
     with open(file_path, 'r') as file:
         tree = ast.parse(file.read())
-        _NodeVisitor().visit(tree)
+        _FuncVisitor().visit(tree)
 
 
 def _process_files(file_paths):
@@ -244,5 +310,10 @@ def _main():
     _process_files(file_paths)
 
 
+eqtex_config = Config()
+_source = None
+
 if __name__ == '__main__':
     _main()
+else:
+    pass
