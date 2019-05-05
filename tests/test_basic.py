@@ -34,7 +34,7 @@ class TestCase(ut.TestCase):
 
 
 class EmptyFunc(TestCase):
-    def test_pass(self):
+    def test_empty(self):
         @eqtex(output=self.buffer)
         def func():
             pass

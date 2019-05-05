@@ -20,7 +20,7 @@ import ast
 import os
 
 from .file_output import _FileOutput
-from .source_visitor import _SourceVisitor
+from .source_visitor import SourceVisitor
 
 
 def _handle_cmg_args():
@@ -41,7 +41,7 @@ def _process_file(file_path):
         global eqtex_config
         tree = ast.parse(file.read())
         output = _FileOutput()
-        _SourceVisitor(None, output, eqtex_config).visit(tree)
+        SourceVisitor(None, output, eqtex_config).visit(tree)
 
 
 def _process_files(file_paths):

@@ -17,10 +17,10 @@
 
 import ast
 
-from .visitor import _Visitor
+from .visitor import Visitor
 
 
-class _FuncVisitor(_Visitor):
+class FuncVisitor(Visitor):
     def __init__(self):
         self.tokens = {}
         self.func_name = None

@@ -18,7 +18,7 @@
 import ast
 
 
-class _Visitor(ast.NodeVisitor):
+class Visitor(ast.NodeVisitor):
     def process(self, node, *args, func_suffix=None, ignore_missing=True):
         if func_suffix:
             name = f'process_{func_suffix}'

@@ -19,8 +19,8 @@ import copy
 import inspect
 
 from .file_output import _FileOutput
-from .source import _Source
-from .source_visitor import _SourceVisitor
+from .source import Source
+from .source_visitor import SourceVisitor
 from .config import eqtex_config
 
 _source = None
@@ -40,7 +40,7 @@ def _process_func(func, **kwargs):
         else:
             setattr(config, key, val)
 
-    v = _SourceVisitor(func_qualname, output, config)
+    v = SourceVisitor(func_qualname, output, config)
     v.visit(_source.tree)
 
 
@@ -51,7 +51,7 @@ def eqtex(**kwargs):
         if eqtex_config.enabled:
             global _source
             if not _source:
-                _source = _Source(file_path)
+                _source = Source(file_path)
             _process_func(func, **kwargs)
         return func
 

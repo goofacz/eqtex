@@ -19,7 +19,7 @@ import ast
 import os
 
 
-class _Source:
+class Source:
     def __init__(self, file_path=None):
         self.file_path = file_path
         self.file_name = os.path.splitext(os.path.basename(self.file_path))[0]

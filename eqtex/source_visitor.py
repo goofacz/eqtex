@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-from .func_visitor import _FuncVisitor
+from .func_visitor import FuncVisitor
 from .output import Output
-from .visitor import _Visitor
+from .visitor import Visitor
 
 
-class _SourceVisitor(_Visitor):
+class SourceVisitor(Visitor):
     def __init__(self, target_func_qualname, output, config):
         self.prefix = []
         self.target_func_qualname = target_func_qualname
@@ -45,7 +45,7 @@ class _SourceVisitor(_Visitor):
                 if func_qualname != self.target_func_qualname:
                     return
 
-            v = _FuncVisitor()
+            v = FuncVisitor()
             v.visit(func)
 
             self.store_tex(v)
