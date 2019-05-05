@@ -17,17 +17,16 @@
 
 import copy
 import inspect
+import ast
 
 from .file_output import _FileOutput
-from .source import Source
 from .source_visitor import SourceVisitor
 from .config import eqtex_config
 
 _source = None
 
 
-def _process_func(func, **kwargs):
-    global _source
+def _process_func(file_path, func, **kwargs):
     global eqtex_config
 
     func_qualname = func.__qualname__.replace('<locals>.', '')
@@ -40,8 +39,11 @@ def _process_func(func, **kwargs):
         else:
             setattr(config, key, val)
 
+    with open(file_path) as handle:
+        tree = ast.parse(handle.read())
+
     v = SourceVisitor(func_qualname, output, config)
-    v.visit(_source.tree)
+    v.visit(tree)
 
 
 def eqtex(**kwargs):
@@ -49,10 +51,7 @@ def eqtex(**kwargs):
 
     def decorator(func):
         if eqtex_config.enabled:
-            global _source
-            if not _source:
-                _source = Source(file_path)
-            _process_func(func, **kwargs)
+            _process_func(file_path, func, **kwargs)
         return func
 
     return decorator
