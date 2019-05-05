@@ -8,8 +8,8 @@ import os
 
 class Output:
     class EqType(enum.Enum):
-        SYM = 1,
-        NUM = 2
+        SYM = 'sym'
+        NUM = 'num'
 
     @abc.abstractmethod
     def process(self, func_name, cls_prefix, eq_type, tex):
@@ -18,12 +18,7 @@ class Output:
 
 class _FileOutput(Output):
     def process(self, func_name, cls_prefix, eq_type, tex):
-        if eq_type == Output.EqType.SYM:
-            type = 'sym'
-        elif eq_type == Output.EqType.NUM:
-            type = 'num'
-
-        fn = f'{"_".join(cls_prefix)}_{func_name}_{type}.tex'
+        fn = f'{"_".join(cls_prefix)}_{func_name}_{eq_type.value}.tex'
         with open(fn, 'w') as f:
             f.write(tex)
 
@@ -281,8 +276,8 @@ class _FuncVisitor(_Visitor):
 
         for stmt in func.body:
             sym, val = self.process(stmt)
-            self.sym_tex = f'{self.sym_tex}\n{sym}'
-            self.val_tex = f'{self.val_tex}\n{val}'
+            self.sym_tex = f'{self.sym_tex}\n{sym}\n'
+            self.val_tex = f'{self.val_tex}\n{val}\n'
 
         p = r'\begin{{equation}}{0}\end{{equation}}'
         self.sym_tex = p.format(self.sym_tex)
