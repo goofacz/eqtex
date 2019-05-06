@@ -42,7 +42,7 @@ class SourceVisitor(Visitor):
                 if func_qualname != self.target_func_qualname:
                     return
 
-            v = FuncVisitor()
+            v = FuncVisitor(self.config)
             v.visit(func)
 
             self.store_tex(v)

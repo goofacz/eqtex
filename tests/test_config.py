@@ -27,12 +27,14 @@ class GlobalConfig(TestCase):
         eqtex_config.enabled = False
         eqtex_config.sym_equation = False
         eqtex_config.val_equation = False
+        eqtex_config.skip_self = False
 
     def tearDown(self):
         global eqtex_config
         eqtex_config.enabled = True
         eqtex_config.sym_equation = True
         eqtex_config.val_equation = True
+        eqtex_config.skip_self = True
 
     def test_disable_all(self):
         @eqtex(output=self.buffer)
@@ -65,6 +67,26 @@ class GlobalConfig(TestCase):
 
         self.assertFalse(hasattr(self.buffer, 'sym'))
         self.assertTrue(hasattr(self.buffer, 'num'))
+
+    def test_disable_skip_self(self):
+        global eqtex_config
+        eqtex_config.enabled = True
+        eqtex_config.sym_equation = True
+        eqtex_config.val_equation = True
+
+        class TestClass:
+            def __init__(self):
+                self.a = 1
+                self.b = 0
+
+            @eqtex(output=self.buffer)
+            def func(self):
+                self.b = self.a + 2
+
+        self.assertEqual(self.buffer.sym,
+                         ['self.b=self.a + 2'])
+        self.assertEqual(self.buffer.num,
+                         ['self.b=self.a + 2'])
 
 
 if __name__ == '__main__':

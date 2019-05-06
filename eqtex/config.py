@@ -22,6 +22,7 @@ class Config:
         self.enabled = True
         self.sym_equation = True
         self.val_equation = True
+        self.skip_self = True
 
         # File output
         self.file_output_single_eq = True

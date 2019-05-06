@@ -21,9 +21,10 @@ from .visitor import Visitor
 
 
 class FuncVisitor(Visitor):
-    def __init__(self):
+    def __init__(self, config):
         self.tokens = {}
         self.func_name = None
+        self.config = config
         self.sym_tex = []
         self.val_tex = []
 
@@ -191,7 +192,14 @@ class FuncVisitor(Visitor):
 
     def process_Attribute(self, attr):
         if attr.value.id == 'self':
-            return attr.attr, self.tokens.get(attr.attr, attr.attr)
+            if not self.config.skip_self:
+                sym = f'self.{attr.attr}'
+                val = self.tokens.get(attr.attr, attr.attr)
+                if val == attr.attr:
+                    val = f'self.{val}'
+                return sym, val
+            else:
+                return attr.attr, self.tokens.get(attr.attr, attr.attr)
         elif attr.attr == 'T':
             return self.process_numpy_transpose([attr.value])
         else:
