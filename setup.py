@@ -21,6 +21,7 @@ setup(
     name='eqtex',
     version='0.1',
     description='EqTex is a Python module for transforming while functions with math equations to LaTeX',
+    packages=['eqtex'],
     url='https://github.com/goofacz/eqtex',
     author='Tomasz Jankowski',
     author_email='tomasz.jankowski.mail@gmail.com',
