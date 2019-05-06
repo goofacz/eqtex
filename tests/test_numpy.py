@@ -62,11 +62,24 @@ class TestNumpy(TestCase):
         self.assertEqual(self.buffer.num,
                          [r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}'])
 
-    def test_transpose(self):
+    def test_transpose_func(self):
         @eqtex(output=self.buffer)
         def func(a, b):
             A = array([[a], [2], [b]])
             B = transpose(A)
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          'B={A}^{T}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}'])
+
+    def test_transpose_attr(self):
+        @eqtex(output=self.buffer)
+        def func(a, b):
+            A = array([[a], [2], [b]])
+            B = A.T
 
         self.assertEqual(self.buffer.sym,
                          [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
