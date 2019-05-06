@@ -50,6 +50,7 @@ def eqtex(**kwargs):
     file_path = inspect.stack()[1][1]
 
     def decorator(func):
+        global eqtex_config
         if eqtex_config.enabled:
             _process_func(file_path, func, **kwargs)
         return func
