@@ -15,26 +15,13 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-import unittest as ut
-
+from common import *
 from eqtex import *
 
 
-class Buffer(Output):
-    def __init__(self):
-        self.sym = False
-        self.num = False
-
-    def process(self, func_name, cls_prefix, eq_type, tex, config):
-        if eq_type == Output.EqType.SYM:
-            self.sym = True
-        elif eq_type == Output.EqType.NUM:
-            self.num = True
-
-
-class GlobalConfig(ut.TestCase):
+class GlobalConfig(TestCase):
     def setUp(self):
-        self.buffer = Buffer()
+        super().setUp()
 
         global eqtex_config
         eqtex_config.enabled = False
@@ -52,8 +39,8 @@ class GlobalConfig(ut.TestCase):
         def func():
             pass
 
-        self.assertFalse(self.buffer.sym)
-        self.assertFalse(self.buffer.num)
+        self.assertFalse(hasattr(self.buffer, 'sym'))
+        self.assertFalse(hasattr(self.buffer, 'num'))
 
     def test_disable_sym(self):
         global eqtex_config
@@ -64,8 +51,8 @@ class GlobalConfig(ut.TestCase):
         def func():
             pass
 
-        self.assertTrue(self.buffer.sym)
-        self.assertFalse(self.buffer.num)
+        self.assertTrue(hasattr(self.buffer, 'sym'))
+        self.assertFalse(hasattr(self.buffer, 'num'))
 
     def test_disable_num(self):
         global eqtex_config
@@ -76,8 +63,8 @@ class GlobalConfig(ut.TestCase):
         def func():
             pass
 
-        self.assertFalse(self.buffer.sym)
-        self.assertTrue(self.buffer.num)
+        self.assertFalse(hasattr(self.buffer, 'sym'))
+        self.assertTrue(hasattr(self.buffer, 'num'))
 
 
 if __name__ == '__main__':
