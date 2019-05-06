@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
+
 class Config:
     def __init__(self):
         # Global
         self.enabled = True
-        self.store_tex = True
         self.sym_equation = True
         self.val_equation = True
 

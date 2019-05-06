@@ -28,9 +28,6 @@ class SourceVisitor(Visitor):
         self.config = config
 
     def store_tex(self, visitor):
-        if not self.config.store_tex:
-            return
-
         if self.config.sym_equation:
             self.output.process(visitor.func_name, self.prefix, Output.EqType.SYM, visitor.sym_tex, self.config)
 
