@@ -20,20 +20,8 @@ import unittest as ut
 import numpy
 from numpy import *
 
+from common import TestCase
 from eqtex import *
-
-
-class Buffer(Output):
-    def process(self, func_name, cls_prefix, eq_type, tex, config):
-        if eq_type == Output.EqType.SYM:
-            self.sym = tex
-        elif eq_type == Output.EqType.NUM:
-            self.num = tex
-
-
-class TestCase(ut.TestCase):
-    def setUp(self):
-        self.buffer = Buffer()
 
 
 class TestNumpy(TestCase):
