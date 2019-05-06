@@ -104,6 +104,19 @@ class TestNumpy(TestCase):
                           r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
                           r'C=\frac{\begin{bmatrix}a\\2\\b\end{bmatrix}}{\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}}'])
 
+    def test_zeros(self):
+        @eqtex(output=self.buffer)
+        def func():
+            A = zeros([2, 3])
+            B = numpy.zeros([2, 3])
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
+                          r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
+                          r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}'])
+
 
 if __name__ == '__main__':
     ut.main()
