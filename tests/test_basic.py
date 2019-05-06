@@ -21,7 +21,7 @@ from common import TestCase
 from eqtex import *
 
 
-class EmptyFunc(TestCase):
+class Funcs(TestCase):
     def test_empty(self):
         @eqtex(output=self.buffer)
         def func():
@@ -34,6 +34,15 @@ class EmptyFunc(TestCase):
         @eqtex(output=self.buffer)
         def func():
             return None
+
+        self.assertEqual(self.buffer.sym, [])
+        self.assertEqual(self.buffer.num, [])
+
+    def text_class_method(self):
+        class TestClass:
+            @eqtex(output=self.buffer)
+            def method(self):
+                pass
 
         self.assertEqual(self.buffer.sym, [])
         self.assertEqual(self.buffer.num, [])
