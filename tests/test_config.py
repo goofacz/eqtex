@@ -71,6 +71,24 @@ class GlobalConfig(TestCase):
         self.assertEqual(self.buffer.num,
                          ['self.b=self.a + 2'])
 
+    def test_enable_skip_self(self):
+        global eqtex_config
+        eqtex_config.skip_self = True
+
+        class TestClass:
+            def __init__(self):
+                self.a = 1
+                self.b = 0
+
+            @eqtex(output=self.buffer)
+            def func(self):
+                self.b = self.a + 2
+
+        self.assertEqual(self.buffer.sym,
+                         ['b=a + 2'])
+        self.assertEqual(self.buffer.num,
+                         ['b=a + 2'])
+
 
 if __name__ == '__main__':
     ut.main()
