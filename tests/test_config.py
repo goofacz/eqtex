@@ -20,23 +20,10 @@ from eqtex import *
 
 
 class GlobalConfig(TestCase):
-    def setUp(self):
-        super().setUp()
-
+    def test_disable_all(self):
         global eqtex_config
         eqtex_config.enabled = False
-        eqtex_config.sym_equation = False
-        eqtex_config.val_equation = False
-        eqtex_config.skip_self = False
 
-    def tearDown(self):
-        global eqtex_config
-        eqtex_config.enabled = True
-        eqtex_config.sym_equation = True
-        eqtex_config.val_equation = True
-        eqtex_config.skip_self = True
-
-    def test_disable_all(self):
         @eqtex(output=self.buffer)
         def func():
             pass
@@ -46,20 +33,7 @@ class GlobalConfig(TestCase):
 
     def test_disable_sym(self):
         global eqtex_config
-        eqtex_config.enabled = True
-        eqtex_config.sym_equation = True
-
-        @eqtex(output=self.buffer)
-        def func():
-            pass
-
-        self.assertTrue(hasattr(self.buffer, 'sym'))
-        self.assertFalse(hasattr(self.buffer, 'num'))
-
-    def test_disable_num(self):
-        global eqtex_config
-        eqtex_config.enabled = True
-        eqtex_config.val_equation = True
+        eqtex_config.sym_equation = False
 
         @eqtex(output=self.buffer)
         def func():
@@ -68,11 +42,20 @@ class GlobalConfig(TestCase):
         self.assertFalse(hasattr(self.buffer, 'sym'))
         self.assertTrue(hasattr(self.buffer, 'num'))
 
+    def test_disable_num(self):
+        global eqtex_config
+        eqtex_config.val_equation = False
+
+        @eqtex(output=self.buffer)
+        def func():
+            pass
+
+        self.assertTrue(hasattr(self.buffer, 'sym'))
+        self.assertFalse(hasattr(self.buffer, 'num'))
+
     def test_disable_skip_self(self):
         global eqtex_config
-        eqtex_config.enabled = True
-        eqtex_config.sym_equation = True
-        eqtex_config.val_equation = True
+        eqtex_config.skip_self = False
 
         class TestClass:
             def __init__(self):
