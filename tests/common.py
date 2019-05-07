@@ -17,7 +17,7 @@
 
 import unittest as ut
 
-from eqtex import Output
+from eqtex import *
 
 
 class Buffer(Output):
@@ -30,4 +30,12 @@ class Buffer(Output):
 
 class TestCase(ut.TestCase):
     def setUp(self):
+        super().setUp()
+        global eqtex_config
+        eqtex_config.reset()
         self.buffer = Buffer()
+
+    def tearDown(self):
+        super().tearDown()
+        global eqtex_config
+        eqtex_config.reset()
