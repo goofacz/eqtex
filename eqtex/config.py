@@ -18,6 +18,9 @@
 
 class Config:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         # Global
         self.enabled = True
         self.sym_equation = True
@@ -29,3 +32,4 @@ class Config:
 
 
 eqtex_config = Config()
+
