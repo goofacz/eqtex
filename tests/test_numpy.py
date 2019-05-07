@@ -25,6 +25,22 @@ from eqtex import *
 
 
 class TestNumpy(TestCase):
+    def test_array(self):
+        @eqtex(output=self.buffer)
+        def func(y, b, a, m, p, D):
+            A = array([[y], [2], [b]])
+            B = array([[a, 5, (8 / m) ** 4], [2, 7, 9], [b, 5, p]])
+            C = A + D
+
+        self.assertEqual(self.buffer.sym,
+                         [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
+                          r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
+                          r'C=A + D'])
+        self.assertEqual(self.buffer.num,
+                         [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
+                          r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
+                          r'C=\begin{bmatrix}y\\2\\b\end{bmatrix} + D'])
+
     def test_ones(self):
         # This test case also check how eqtex handles different ways of calling functions/methods.
 
