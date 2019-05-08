@@ -21,13 +21,11 @@ from common import *
 from eqtex import *
 
 
-class FileOutput(TestCase):
-    def setUp(self):
-        super().setUp()
+class TestFileOutput(TestBase):
+    def setup_method(self):
         os.system('rm *tex -f')
 
-    def tearDown(self):
-        super().tearDown()
+    def teardown_method(self):
         os.system('rm *tex -f')
 
     def test_enable_single_eq(self):
@@ -39,13 +37,13 @@ class FileOutput(TestCase):
             a = 1
             b = 2
 
-        self.assertTrue(os.path.exists('FileOutput_test_enable_single_eq_func_sym.tex'))
-        with open('FileOutput_test_enable_single_eq_func_sym.tex', 'r') as f:
-            self.assertEqual(f.read(), r'a=1\\b=2')
+        assert os.path.exists('TestFileOutput_test_enable_single_eq_func_sym.tex')
+        with open('TestFileOutput_test_enable_single_eq_func_sym.tex', 'r') as f:
+            assert f.read() == r'a=1\\b=2'
 
-        self.assertTrue(os.path.exists('FileOutput_test_enable_single_eq_func_num.tex'))
-        with open('FileOutput_test_enable_single_eq_func_num.tex', 'r') as f:
-            self.assertEqual(f.read(), r'a=1\\b=2')
+        assert os.path.exists('TestFileOutput_test_enable_single_eq_func_num.tex')
+        with open('TestFileOutput_test_enable_single_eq_func_num.tex', 'r') as f:
+            assert f.read() == r'a=1\\b=2'
 
     def test_disable_single_eq(self):
         global eqtex_config
@@ -56,22 +54,18 @@ class FileOutput(TestCase):
             a = 1
             b = 2
 
-        self.assertTrue(os.path.exists('FileOutput_test_disable_single_eq_func_sym_0.tex'))
-        with open('FileOutput_test_disable_single_eq_func_sym_0.tex', 'r') as f:
-            self.assertEqual(f.read(), r'a=1')
+        assert os.path.exists('TestFileOutput_test_disable_single_eq_func_sym_0.tex')
+        with open('TestFileOutput_test_disable_single_eq_func_sym_0.tex', 'r') as f:
+            assert f.read() == r'a=1'
 
-        self.assertTrue(os.path.exists('FileOutput_test_disable_single_eq_func_sym_1.tex'))
-        with open('FileOutput_test_disable_single_eq_func_sym_1.tex', 'r') as f:
-            self.assertEqual(f.read(), r'b=2')
+        assert os.path.exists('TestFileOutput_test_disable_single_eq_func_sym_1.tex')
+        with open('TestFileOutput_test_disable_single_eq_func_sym_1.tex', 'r') as f:
+            assert f.read() == r'b=2'
 
-        self.assertTrue(os.path.exists('FileOutput_test_disable_single_eq_func_num_0.tex'))
-        with open('FileOutput_test_disable_single_eq_func_num_0.tex', 'r') as f:
-            self.assertEqual(f.read(), r'a=1')
+        assert os.path.exists('TestFileOutput_test_disable_single_eq_func_num_0.tex')
+        with open('TestFileOutput_test_disable_single_eq_func_num_0.tex', 'r') as f:
+            assert f.read() == r'a=1'
 
-        self.assertTrue(os.path.exists('FileOutput_test_disable_single_eq_func_num_1.tex'))
-        with open('FileOutput_test_disable_single_eq_func_num_1.tex', 'r') as f:
-            self.assertEqual(f.read(), r'b=2')
-
-
-if __name__ == '__main__':
-    ut.main()
+        assert os.path.exists('TestFileOutput_test_disable_single_eq_func_num_1.tex')
+        with open('TestFileOutput_test_disable_single_eq_func_num_1.tex', 'r') as f:
+            assert f.read() == r'b=2'

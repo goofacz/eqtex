@@ -7,57 +7,52 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
-# EqTex is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# EqTex is distributed in the hope that it will be useful == # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser Public License for more details.
 #
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-import unittest as ut
-
-from common import TestCase
+from common import TestBase
 from eqtex import *
 
 
-class Funcs(TestCase):
+class TestFuncs(TestBase):
     def test_empty(self):
         @eqtex(output=self.buffer)
         def func():
             pass
 
-        self.assertEqual(self.buffer.sym, [])
-        self.assertEqual(self.buffer.num, [])
+        assert self.buffer.sym == []
+        assert self.buffer.num == []
 
     def test_return(self):
         @eqtex(output=self.buffer)
         def func():
             return None
 
-        self.assertEqual(self.buffer.sym, [])
-        self.assertEqual(self.buffer.num, [])
+        assert self.buffer.sym == []
+        assert self.buffer.num == []
 
-    def text_class_method(self):
+    def test_class_method(self):
         class TestClass:
             @eqtex(output=self.buffer)
             def method(self):
                 pass
 
-        self.assertEqual(self.buffer.sym, [])
-        self.assertEqual(self.buffer.num, [])
+        assert self.buffer.sym == []
+        assert self.buffer.num == []
 
 
-class Assign(TestCase):
+class TestAssign(TestBase):
     def test1(self):
         @eqtex(output=self.buffer)
         def func():
             a = 1
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1'])
+        assert self.buffer.sym == ['a=1']
+        assert self.buffer.num == ['a=1']
 
     def test2(self):
         @eqtex(output=self.buffer)
@@ -65,27 +60,19 @@ class Assign(TestCase):
             a = 1
             b = a
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          'b=a'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          'b=1'])
+        assert self.buffer.sym == ['a=1', 'b=a']
+        assert self.buffer.num == ['a=1', 'b=1']
 
 
-class SimpleOperators(TestCase):
+class SimpleOperators(TestBase):
     def test_add(self):
         @eqtex(output=self.buffer)
         def func():
             a = 1
             b = a + 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          'b=a + 2'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          'b=1 + 2'])
+        assert self.buffer.sym == ['a=1', 'b=a + 2']
+        assert self.buffer.num == ['a=1', 'b=1 + 2']
 
     def test_min(self):
         @eqtex(output=self.buffer)
@@ -93,12 +80,8 @@ class SimpleOperators(TestCase):
             a = 1
             b = a - 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          'b=a - 2'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          'b=1 - 2'])
+        assert self.buffer.sym == ['a=1', 'b=a - 2']
+        assert self.buffer.num == ['a=1', 'b=1 - 2']
 
     def test_mult(self):
         @eqtex(output=self.buffer)
@@ -106,12 +89,8 @@ class SimpleOperators(TestCase):
             a = 1
             b = a * 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          r'b=a \cdot 2'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          r'b=1 \cdot 2'])
+        assert self.buffer.sym == ['a=1', r'b=a \cdot 2']
+        assert self.buffer.num == ['a=1', r'b=1 \cdot 2']
 
     def test_div(self):
         @eqtex(output=self.buffer)
@@ -119,12 +98,8 @@ class SimpleOperators(TestCase):
             a = 1
             b = a / 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          r'b=\frac{a}{2}'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          r'b=\frac{1}{2}'])
+        assert self.buffer.sym == ['a=1', r'b=\frac{a}{2}']
+        assert self.buffer.num == ['a=1', r'b=\frac{1}{2}']
 
     def test_matmul(self):
         @eqtex(output=self.buffer)
@@ -132,45 +107,31 @@ class SimpleOperators(TestCase):
             a = 1
             b = a @ 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a=1',
-                          r'b=a \, 2'])
-        self.assertEqual(self.buffer.num,
-                         ['a=1',
-                          r'b=1 \, 2'])
+        assert self.buffer.sym == ['a=1', r'b=a \, 2']
+        assert self.buffer.num == ['a=1', r'b=1 \, 2']
 
     def test_pow(self):
         @eqtex(output=self.buffer)
         def func():
             a = 1 ** 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['a={1}^{2}'])
-        self.assertEqual(self.buffer.num,
-                         ['a={1}^{2}'])
+        assert self.buffer.sym == ['a={1}^{2}']
+        assert self.buffer.num == ['a={1}^{2}']
 
 
-class OperatorPrecedence(TestCase):
+class OperatorPrecedence(TestBase):
     def test_1(self):
         @eqtex(output=self.buffer)
         def func():
             a = (1 + 2) * 3
 
-        self.assertEqual(self.buffer.sym,
-                         [r'a=\left(1 + 2\right) \cdot 3'])
-        self.assertEqual(self.buffer.num,
-                         [r'a=\left(1 + 2\right) \cdot 3'])
+        assert self.buffer.sym == [r'a=\left(1 + 2\right) \cdot 3']
+        assert self.buffer.num == [r'a=\left(1 + 2\right) \cdot 3']
 
     def test_2(self):
         @eqtex(output=self.buffer)
         def func():
             a = ((1 + ((2 + 3) / 4) / 5)) * 6
 
-        self.assertEqual(self.buffer.sym,
-                         [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6'])
-        self.assertEqual(self.buffer.num,
-                         [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6'])
-
-
-if __name__ == '__main__':
-    ut.main()
+        assert self.buffer.sym == [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6']
+        assert self.buffer.num == [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6']

@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-import unittest as ut
-
 from eqtex import *
 
 
@@ -28,14 +26,12 @@ class Buffer(Output):
             self.num = tex
 
 
-class TestCase(ut.TestCase):
-    def setUp(self):
-        super().setUp()
+class TestBase:
+    def setup_method(self):
         global eqtex_config
         eqtex_config.reset()
         self.buffer = Buffer()
 
-    def tearDown(self):
-        super().tearDown()
+    def teardown_method(self):
         global eqtex_config
         eqtex_config.reset()

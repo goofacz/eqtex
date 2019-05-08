@@ -28,7 +28,7 @@ setup(
     keywords='python scientific latex numpy',
     python_requires='>=3.0',
     extras_require={
-        'test': ['numpy'],
+        'test': ['numpy', 'pytest'],
     },
 
     # TODO

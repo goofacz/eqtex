@@ -19,7 +19,7 @@ from common import *
 from eqtex import *
 
 
-class GlobalConfig(TestCase):
+class TestGlobalConfig(TestBase):
     def test_disable_all(self):
         global eqtex_config
         eqtex_config.enabled = False
@@ -28,8 +28,8 @@ class GlobalConfig(TestCase):
         def func():
             pass
 
-        self.assertFalse(hasattr(self.buffer, 'sym'))
-        self.assertFalse(hasattr(self.buffer, 'num'))
+        assert not hasattr(self.buffer, 'sym')
+        assert not hasattr(self.buffer, 'num')
 
     def test_disable_sym(self):
         global eqtex_config
@@ -39,8 +39,8 @@ class GlobalConfig(TestCase):
         def func():
             pass
 
-        self.assertFalse(hasattr(self.buffer, 'sym'))
-        self.assertTrue(hasattr(self.buffer, 'num'))
+        assert not hasattr(self.buffer, 'sym')
+        assert hasattr(self.buffer, 'num')
 
     def test_disable_num(self):
         global eqtex_config
@@ -50,8 +50,8 @@ class GlobalConfig(TestCase):
         def func():
             pass
 
-        self.assertTrue(hasattr(self.buffer, 'sym'))
-        self.assertFalse(hasattr(self.buffer, 'num'))
+        assert hasattr(self.buffer, 'sym')
+        assert not hasattr(self.buffer, 'num')
 
     def test_disable_skip_self(self):
         global eqtex_config
@@ -66,10 +66,8 @@ class GlobalConfig(TestCase):
             def func(self):
                 self.b = self.a + 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['self.b=self.a + 2'])
-        self.assertEqual(self.buffer.num,
-                         ['self.b=self.a + 2'])
+        assert self.buffer.sym == ['self.b=self.a + 2']
+        assert self.buffer.num == ['self.b=self.a + 2']
 
     def test_enable_skip_self(self):
         global eqtex_config
@@ -84,11 +82,5 @@ class GlobalConfig(TestCase):
             def func(self):
                 self.b = self.a + 2
 
-        self.assertEqual(self.buffer.sym,
-                         ['b=a + 2'])
-        self.assertEqual(self.buffer.num,
-                         ['b=a + 2'])
-
-
-if __name__ == '__main__':
-    ut.main()
+        assert self.buffer.sym == ['b=a + 2']
+        assert self.buffer.num == ['b=a + 2']

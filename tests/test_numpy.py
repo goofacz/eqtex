@@ -15,16 +15,14 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with EqTex. If not, see <http://www.gnu.org/licenses/>.
 
-import unittest as ut
-
 import numpy
 from numpy import *
 
-from common import TestCase
+from common import TestBase
 from eqtex import *
 
 
-class TestNumpy(TestCase):
+class TestNumpy(TestBase):
     def test_array(self):
         @eqtex(output=self.buffer)
         def func(y, b, a, m, p, D):
@@ -32,14 +30,12 @@ class TestNumpy(TestCase):
             B = array([[a, 5, (8 / m) ** 4], [2, 7, 9], [b, 5, p]])
             C = A + D
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
-                          r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
-                          r'C=A + D'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
-                          r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
-                          r'C=\begin{bmatrix}y\\2\\b\end{bmatrix} + D'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
+                                   r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
+                                   r'C=A + D']
+        assert self.buffer.num == [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
+                                   r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
+                                   r'C=\begin{bmatrix}y\\2\\b\end{bmatrix} + D']
 
     def test_ones(self):
         # This test case also check how eqtex handles different ways of calling functions/methods.
@@ -49,22 +45,19 @@ class TestNumpy(TestCase):
             A = ones([2, 4])
             B = numpy.ones([2, 4])
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
-                          r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
-                          r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
+                                   r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
+                                   r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}']
 
     def test_eye(self):
         @eqtex(output=self.buffer)
         def func():
             A = eye(5)
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=I_{5}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}'])
+        assert self.buffer.sym == [r'A=I_{5}']
+        assert self.buffer.num == [
+            r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}']
 
     def test_transpose_func(self):
         @eqtex(output=self.buffer)
@@ -72,12 +65,10 @@ class TestNumpy(TestCase):
             A = array([[a], [2], [b]])
             B = transpose(A)
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          'B={A}^{T}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   'B={A}^{T}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}']
 
     def test_transpose_attr(self):
         @eqtex(output=self.buffer)
@@ -85,12 +76,10 @@ class TestNumpy(TestCase):
             A = array([[a], [2], [b]])
             B = A.T
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          'B={A}^{T}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   'B={A}^{T}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{T}']
 
     def test_invert(self):
         @eqtex(output=self.buffer)
@@ -98,12 +87,10 @@ class TestNumpy(TestCase):
             A = array([[a], [2], [b]])
             B = invert(A)
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          'B={A}^{-1}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{-1}'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   'B={A}^{-1}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   r'B={\begin{bmatrix}a\\2\\b\end{bmatrix}}^{-1}']
 
     def test_divide(self):
         @eqtex(output=self.buffer)
@@ -112,14 +99,12 @@ class TestNumpy(TestCase):
             B = array([[c, d], [3, 4], [e, f]])
             C = divide(A, B)
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
-                          r'C=\frac{A}{B}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
-                          r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
-                          r'C=\frac{\begin{bmatrix}a\\2\\b\end{bmatrix}}{\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}}'])
+        assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
+                                   r'C=\frac{A}{B}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
+                                   r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
+                                   r'C=\frac{\begin{bmatrix}a\\2\\b\end{bmatrix}}{\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}}']
 
     def test_zeros(self):
         @eqtex(output=self.buffer)
@@ -127,13 +112,7 @@ class TestNumpy(TestCase):
             A = zeros([2, 3])
             B = numpy.zeros([2, 3])
 
-        self.assertEqual(self.buffer.sym,
-                         [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
-                          r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}'])
-        self.assertEqual(self.buffer.num,
-                         [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
-                          r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}'])
-
-
-if __name__ == '__main__':
-    ut.main()
+        assert self.buffer.sym == [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
+                                   r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}']
+        assert self.buffer.num == [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
+                                   r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}']
