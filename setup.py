@@ -27,6 +27,7 @@ setup(
     author_email='tomasz.jankowski.mail@gmail.com',
     keywords='python scientific latex numpy',
     python_requires='>=3.6',
+    install_require=['sympy'],
     extras_require={
         'test': ['numpy', 'pytest'],
     },

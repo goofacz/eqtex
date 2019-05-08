@@ -20,5 +20,7 @@ from .main import _main
 from .output import Output
 from .tag import eqtex
 
+import preview
+
 if __name__ == '__main__':
     _main()
