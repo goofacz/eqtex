@@ -26,7 +26,7 @@ setup(
     author='Tomasz Jankowski',
     author_email='tomasz.jankowski.mail@gmail.com',
     keywords='python scientific latex numpy',
-    python_requires='>=3.0',
+    python_requires='>=3.6',
     extras_require={
         'test': ['numpy', 'pytest'],
     },
