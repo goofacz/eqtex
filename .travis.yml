@@ -27,6 +27,8 @@ python:
 
 install:
   - pip install .[test]
+  - pip install .
 
 script:
-  - pytest tests
+  - cd tests
+  - pytest .
