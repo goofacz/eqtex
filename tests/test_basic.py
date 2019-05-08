@@ -64,7 +64,7 @@ class TestAssign(TestBase):
         assert self.buffer.num == ['a=1', 'b=1']
 
 
-class SimpleOperators(TestBase):
+class TestSimpleOperators(TestBase):
     def test_add(self):
         @eqtex(output=self.buffer)
         def func():
@@ -119,7 +119,7 @@ class SimpleOperators(TestBase):
         assert self.buffer.num == ['a={1}^{2}']
 
 
-class OperatorPrecedence(TestBase):
+class TestOperatorPrecedence(TestBase):
     def test_1(self):
         @eqtex(output=self.buffer)
         def func():
