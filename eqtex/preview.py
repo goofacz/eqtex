@@ -17,7 +17,7 @@
 
 import sympy as sp
 
-from output import Output
+from .output import Output
 
 
 class PreviewOutput(Output):
