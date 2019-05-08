@@ -19,8 +19,7 @@ from .config import eqtex_config
 from .main import _main
 from .output import Output
 from .tag import eqtex
-
-import preview
+from .preview import PreviewOutput
 
 if __name__ == '__main__':
     _main()
