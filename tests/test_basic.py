@@ -24,6 +24,8 @@ class TestFuncs(TestBase):
         def func():
             pass
 
+        func()
+
         assert self.buffer.sym == []
         assert self.buffer.num == []
 
@@ -31,6 +33,8 @@ class TestFuncs(TestBase):
         @eqtex(output=self.buffer)
         def func():
             return None
+
+        func()
 
         assert self.buffer.sym == []
         assert self.buffer.num == []
@@ -40,6 +44,9 @@ class TestFuncs(TestBase):
             @eqtex(output=self.buffer)
             def method(self):
                 pass
+
+        instance = TestClass()
+        instance.method()
 
         assert self.buffer.sym == []
         assert self.buffer.num == []
@@ -51,6 +58,8 @@ class TestAssign(TestBase):
         def func():
             a = 1
 
+        func()
+
         assert self.buffer.sym == ['a=1']
         assert self.buffer.num == ['a=1']
 
@@ -59,6 +68,8 @@ class TestAssign(TestBase):
         def func():
             a = 1
             b = a
+
+        func()
 
         assert self.buffer.sym == ['a=1', 'b=a']
         assert self.buffer.num == ['a=1', 'b=1']
@@ -71,6 +82,8 @@ class TestSimpleOperators(TestBase):
             a = 1
             b = a + 2
 
+        func()
+
         assert self.buffer.sym == ['a=1', 'b=a + 2']
         assert self.buffer.num == ['a=1', 'b=1 + 2']
 
@@ -79,6 +92,8 @@ class TestSimpleOperators(TestBase):
         def func():
             a = 1
             b = a - 2
+
+        func()
 
         assert self.buffer.sym == ['a=1', 'b=a - 2']
         assert self.buffer.num == ['a=1', 'b=1 - 2']
@@ -89,6 +104,8 @@ class TestSimpleOperators(TestBase):
             a = 1
             b = a * 2
 
+        func()
+
         assert self.buffer.sym == ['a=1', r'b=a \cdot 2']
         assert self.buffer.num == ['a=1', r'b=1 \cdot 2']
 
@@ -98,14 +115,19 @@ class TestSimpleOperators(TestBase):
             a = 1
             b = a / 2
 
+        func()
+
         assert self.buffer.sym == ['a=1', r'b=\frac{a}{2}']
         assert self.buffer.num == ['a=1', r'b=\frac{1}{2}']
 
+    # TODO Move matmul operator to numpy tests?
     def test_matmul(self):
         @eqtex(output=self.buffer)
         def func():
             a = 1
             b = a @ 2
+
+        func()
 
         assert self.buffer.sym == ['a=1', r'b=a \, 2']
         assert self.buffer.num == ['a=1', r'b=1 \, 2']
@@ -114,6 +136,8 @@ class TestSimpleOperators(TestBase):
         @eqtex(output=self.buffer)
         def func():
             a = 1 ** 2
+
+        func()
 
         assert self.buffer.sym == ['a={1}^{2}']
         assert self.buffer.num == ['a={1}^{2}']
@@ -125,6 +149,8 @@ class TestOperatorPrecedence(TestBase):
         def func():
             a = (1 + 2) * 3
 
+        func()
+
         assert self.buffer.sym == [r'a=\left(1 + 2\right) \cdot 3']
         assert self.buffer.num == [r'a=\left(1 + 2\right) \cdot 3']
 
@@ -132,6 +158,8 @@ class TestOperatorPrecedence(TestBase):
         @eqtex(output=self.buffer)
         def func():
             a = ((1 + ((2 + 3) / 4) / 5)) * 6
+
+        func()
 
         assert self.buffer.sym == [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6']
         assert self.buffer.num == [r'a=\left(1 + \frac{\frac{2 + 3}{4}}{5}\right) \cdot 6']
