@@ -23,6 +23,7 @@ import sys
 from .file_output import _FileOutput
 from .source_visitor import SourceVisitor
 from .config import eqtex_config
+from .cache import cache
 
 _source = None
 
@@ -54,14 +55,25 @@ def eqtex(**eqtex_kwargs):
 
     def decorator(func):
         def wrapped(*args, **kwargs):
-            #sys.settrace(_trace_handler)
-            result = func(*args, **kwargs)
-            #sys.settrace(None)
-            return result
+            global eqtex_config
 
-        global eqtex_config
-        if eqtex_config.enabled:
-            _process_func(file_path, func, **eqtex_kwargs)
+            if eqtex_config.enabled:
+                global cache
+
+                if not cache.has_func(func.__qualname__):
+                    try:
+                        sys.settrace(_trace_handler)
+                        result = func(*args, **kwargs)
+                    except:
+                        raise
+                    finally:
+                        sys.settrace(None)
+
+                    _process_func(file_path, func, **eqtex_kwargs)
+
+                    return result
+
+            return func(*args, **kwargs)
 
         return wrapped
 
