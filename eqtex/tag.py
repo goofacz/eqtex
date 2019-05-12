@@ -47,7 +47,7 @@ def _process_func(file_path, func, **kwargs):
 
 
 def eqtex(**kwargs):
-    file_path = inspect.stack()[1][1]
+    file_path = inspect.stack()[1].filename
 
     def decorator(func):
         global eqtex_config
