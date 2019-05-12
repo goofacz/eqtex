@@ -28,6 +28,8 @@ class TestGlobalConfig(TestBase):
         def func():
             pass
 
+        func()
+
         assert not hasattr(self.buffer, 'sym')
         assert not hasattr(self.buffer, 'num')
 
@@ -39,6 +41,8 @@ class TestGlobalConfig(TestBase):
         def func():
             pass
 
+        func()
+
         assert not hasattr(self.buffer, 'sym')
         assert hasattr(self.buffer, 'num')
 
@@ -49,6 +53,8 @@ class TestGlobalConfig(TestBase):
         @eqtex(output=self.buffer)
         def func():
             pass
+
+        func()
 
         assert hasattr(self.buffer, 'sym')
         assert not hasattr(self.buffer, 'num')
@@ -66,6 +72,9 @@ class TestGlobalConfig(TestBase):
             def func(self):
                 self.b = self.a + 2
 
+        inst = TestClass()
+        inst.func()
+
         assert self.buffer.sym == ['self.b=self.a + 2']
         assert self.buffer.num == ['self.b=self.a + 2']
 
@@ -81,6 +90,9 @@ class TestGlobalConfig(TestBase):
             @eqtex(output=self.buffer)
             def func(self):
                 self.b = self.a + 2
+
+        inst = TestClass()
+        inst.func()
 
         assert self.buffer.sym == ['b=a + 2']
         assert self.buffer.num == ['b=a + 2']

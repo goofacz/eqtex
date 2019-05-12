@@ -30,12 +30,30 @@ class TestNumpy(TestBase):
             B = array([[a, 5, (8 / m) ** 4], [2, 7, 9], [b, 5, p]])
             C = A + D
 
+        func(1, 2, 3, 4, 5, 6)
+
         assert self.buffer.sym == [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
                                    r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
                                    r'C=A + D']
         assert self.buffer.num == [r'A=\begin{bmatrix}y\\2\\b\end{bmatrix}',
                                    r'B=\begin{bmatrix}a&5&{\left(\frac{8}{m}\right)}^{4}\\2&7&9\\b&5&p\end{bmatrix}',
                                    r'C=\begin{bmatrix}y\\2\\b\end{bmatrix} + D']
+
+    def test_matmul_operator(self):
+        @eqtex(output=self.buffer)
+        def func():
+            A = array([4, 5, 6])
+            B = array([[1], [2], [3]])
+            C = A @ B
+
+        func()
+
+        assert self.buffer.sym == [r'A=\begin{bmatrix}4&5&6\end{bmatrix}',
+                                   r'B=\begin{bmatrix}1\\2\\3\end{bmatrix}',
+                                   r'C=A \, B']
+        assert self.buffer.num == [r'A=\begin{bmatrix}4&5&6\end{bmatrix}',
+                                   r'B=\begin{bmatrix}1\\2\\3\end{bmatrix}',
+                                   r'C=\begin{bmatrix}4&5&6\end{bmatrix} \, \begin{bmatrix}1\\2\\3\end{bmatrix}']
 
     def test_ones(self):
         # This test case also check how eqtex handles different ways of calling functions/methods.
@@ -44,6 +62,8 @@ class TestNumpy(TestBase):
         def func():
             A = ones([2, 4])
             B = numpy.ones([2, 4])
+
+        func()
 
         assert self.buffer.sym == [r'A=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}',
                                    r'B=\begin{bmatrix}1&1&1&1\\1&1&1&1\end{bmatrix}']
@@ -55,6 +75,8 @@ class TestNumpy(TestBase):
         def func():
             A = eye(5)
 
+        func()
+
         assert self.buffer.sym == [r'A=I_{5}']
         assert self.buffer.num == [
             r'A=\begin{bmatrix}1&0&0&0&0\\0&1&0&0&0\\0&0&1&0&0\\0&0&0&1&0\\0&0&0&0&1\end{bmatrix}_{5}']
@@ -64,6 +86,8 @@ class TestNumpy(TestBase):
         def func(a, b):
             A = array([[a], [2], [b]])
             B = transpose(A)
+
+        func(1, 2)
 
         assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
                                    'B={A}^{T}']
@@ -76,6 +100,8 @@ class TestNumpy(TestBase):
             A = array([[a], [2], [b]])
             B = A.T
 
+        func(1, 2)
+
         assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
                                    'B={A}^{T}']
         assert self.buffer.num == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
@@ -86,6 +112,8 @@ class TestNumpy(TestBase):
         def func(a, b):
             A = array([[a], [2], [b]])
             B = invert(A)
+
+        func(1, 2)
 
         assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
                                    'B={A}^{-1}']
@@ -99,6 +127,8 @@ class TestNumpy(TestBase):
             B = array([[c, d], [3, 4], [e, f]])
             C = divide(A, B)
 
+        func(1, 2, 3, 4, 5, 6)
+
         assert self.buffer.sym == [r'A=\begin{bmatrix}a\\2\\b\end{bmatrix}',
                                    r'B=\begin{bmatrix}c&d\\3&4\\e&f\end{bmatrix}',
                                    r'C=\frac{A}{B}']
@@ -111,6 +141,8 @@ class TestNumpy(TestBase):
         def func():
             A = zeros([2, 3])
             B = numpy.zeros([2, 3])
+
+        func()
 
         assert self.buffer.sym == [r'A=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}',
                                    r'B=\begin{bmatrix}0&0&0\\0&0&0\end{bmatrix}']

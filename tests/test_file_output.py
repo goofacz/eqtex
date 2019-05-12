@@ -37,6 +37,8 @@ class TestFileOutput(TestBase):
             a = 1
             b = 2
 
+        func()
+
         assert os.path.exists('TestFileOutput_test_enable_single_eq_func_sym.tex')
         with open('TestFileOutput_test_enable_single_eq_func_sym.tex', 'r') as f:
             assert f.read() == r'a=1\\b=2'
@@ -53,6 +55,8 @@ class TestFileOutput(TestBase):
         def func():
             a = 1
             b = 2
+
+        func()
 
         assert os.path.exists('TestFileOutput_test_disable_single_eq_func_sym_0.tex')
         with open('TestFileOutput_test_disable_single_eq_func_sym_0.tex', 'r') as f:

@@ -120,17 +120,7 @@ class TestSimpleOperators(TestBase):
         assert self.buffer.sym == ['a=1', r'b=\frac{a}{2}']
         assert self.buffer.num == ['a=1', r'b=\frac{1}{2}']
 
-    # TODO Move matmul operator to numpy tests?
-    def test_matmul(self):
-        @eqtex(output=self.buffer)
-        def func():
-            a = 1
-            b = a @ 2
-
-        func()
-
-        assert self.buffer.sym == ['a=1', r'b=a \, 2']
-        assert self.buffer.num == ['a=1', r'b=1 \, 2']
+    # matmul operator is tested in test_numpy
 
     def test_pow(self):
         @eqtex(output=self.buffer)
