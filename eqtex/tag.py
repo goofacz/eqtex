@@ -18,6 +18,7 @@
 import copy
 import inspect
 import ast
+import sys
 
 from .file_output import _FileOutput
 from .source_visitor import SourceVisitor
@@ -45,14 +46,23 @@ def _process_func(file_path, func, **kwargs):
     v = SourceVisitor(func_qualname, output, config)
     v.visit(tree)
 
+def _trace_handler(frame, event, arg):
+    pass
 
-def eqtex(**kwargs):
+def eqtex(**eqtex_kwargs):
     file_path = inspect.stack()[1][1]
 
     def decorator(func):
+        def wrapped(*args, **kwargs):
+            #sys.settrace(_trace_handler)
+            result = func(*args, **kwargs)
+            #sys.settrace(None)
+            return result
+
         global eqtex_config
         if eqtex_config.enabled:
-            _process_func(file_path, func, **kwargs)
-        return func
+            _process_func(file_path, func, **eqtex_kwargs)
+
+        return wrapped
 
     return decorator
